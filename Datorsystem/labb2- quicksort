@@ -14,7 +14,28 @@ start:
 	la s0, vek			# a0 har vek	
 	li a0, 0			# a1 = 0   (low)
 	addi a1, t0, -1		# a2 = 9  (high)
-    jal quicksort
+    	jal quicksort
+    	jal skriv
+    
+skriv:   
+	 li t0, 0
+ 	print:
+	 bge t0,10,L2
+    	nop
+    	sll t1,t0,2
+    	add t1,s0, t1
+    	lw t1, 0(t1)
+    	nop 
+
+	la a0, str1
+	move a1, t1   
+  	jal printf    
+  	nop
+  	addi t0,t0,1
+  	b print
+  	nop     
+  	
+ L2:
     
 quicksort:   
 
