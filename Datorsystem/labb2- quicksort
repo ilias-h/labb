@@ -1,0 +1,99 @@
+#include <iregdef.h>
+.data
+vek:	.word  4,5,2,2,1,6,7,9,5,10	
+n:      .word  10
+str1:	.asciiz "%d\n"
+    
+	.text
+	.globl start
+		
+
+start:
+			
+	lw t0, n            # t0 har n=antal element	
+	la s0, vek			# a0 har vek	
+	li a0, 0			# a1 = 0   (low)
+	addi a1, t0, -1		# a2 = 9  (high)
+    jal quicksort
+    
+quicksort:   
+
+	slt t8, a0, a1
+	beq t8, zero, return
+	j keep
+	return:
+		jr ra
+	keep:
+	
+	addi sp, sp, -12
+	sw ra, 8(sp)
+	sw a1, 4(sp)
+	
+	sll t3, a0, 2
+	add t3, t3 ,s0
+	lw t3, 0(t3)
+	
+	addi t0, a0, 1
+	addi t1, a1, 0	 
+	loop:
+		loopI:
+			sll t4, t0, 2
+			add t4, s0, t4
+			lw t5, 0(t4)
+			slt t8, t3, t5
+			bne t8, zero, BreakI
+			addi t0, t0, 1
+			slt t8, a1, t0
+			bne t8, zero, BreakI
+		BreakI:
+		
+		loopJ:	
+			sll t6, t1, 2
+			add t6, s0, t6
+			lw t7, 0(t6)
+			slt t8, t7, t3
+			bne t8, zero, BreakJ
+			addi t1, t1, -1
+			slt t8, a0, t1
+			beq t8, zero, BreakJ
+		BreakJ:	
+		
+		slt t8, t1, t0
+		bne t8, zero, EndLoop
+		
+		sll t4, t0, 2
+		add t4, s0, t4
+		lw t5, 0(t4)
+		sll t6, t1, 2
+		add t6, s0, t6       
+    	lw t7, 0(t6)         
+    	sw t7, 0(t4)
+    	sw t5, 0(t6)          
+
+    	j Loop       // b BreakJ  
+    EndLoop:
+    
+        sll t4, a0, 2           # $t4 = left * 4
+  	    add t4, s0, t4         # $t4 = &array[left]
+  	    sll t6, t1, 2           # $t6 = j * 4
+  		add t6, s0, t6         # $t6 = &array[j]
+  		lw t7, 0(t6)            # $t7 = array[j]
+  		sw t7, 0(t4)
+  		sw t3, 0(t6)            # swap(array[left], array[j])
+  
+ 		sw t1, 0(sp)            # push j
+ 		addi a1, t1, 0          # $a1 = j
+  		jal quicksort                 # Qsort(left, j)
+  		lw t1, 0(sp)            # pop j, $t1 = j
+  		addi a0, t1, 1          # $a0 = j + 1
+  		lw a1, 4(sp)            # pop right, $a1 = right
+  		jal quicksort                 # Qsort(j + 1, right)
+
+  		lw ra, 8(sp)           # pop return address
+  		addi sp, sp, 12
+  		jr ra                    # return	                
+		
+		
+		
+		
+		
