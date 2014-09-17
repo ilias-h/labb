@@ -1,0 +1,189 @@
+.data
+vek:	.word  4,5,2,2,1,6,7,9,5,10	
+n:      .word  10
+str1:	.asciiz "%d\n"
+   
+	.text
+	.globl start
+		
+
+start:
+	
+	lw t0, n            # t0 har n=antal element	
+	la a0, vek			# a0 har vek	
+	li a1, 0			# a1 = 0   (low)
+	addi a2, t0, -1		# a2 = 9  (high)
+    jal quicksort
+    
+   // li  v0,10   #system code for exit
+   // syscall
+endStart: 
+
+    	.text
+		.globl quicksort	    
+        
+        
+quicksort:
+
+    addi	sp, sp, -20	# make room on stack for 5 registers
+	sw	s0, 4(sp)		# save $s0 on stack
+	sw	s1, 8(sp)		# save $s1 on stack
+	sw	s2, 12(sp)		# save $s2 on stack
+	sw	s3, 16(sp)		# save $s3 on stack
+	sw	ra, 20(sp)		# save $ra on stack
+
+	move	s0, a0		# copy param. $a0 into $s0 (addr array)
+	move 	s1, a1		# copy param. $a1 into $s1 (low)
+	move 	s2, a2		# copy param. $a2 into $s2 (high)
+	jal  if
+if:
+	blt		s1, s2, then
+	jal		endif
+
+then:	
+
+	move 	a0, s0
+	move 	a1, s1
+	move 	a2, s2
+	jal	partition
+	move 	s3, v0		# save pivotPosition
+
+	move 	a0, s0
+	move 	a1, s1
+	addi 	a2, s3, -1
+	jal	quicksort
+
+	move 	a0, s0
+	addi	a1, s3, 1
+	move	a2, s2
+	jal	quicksort
+
+endif:
+
+	lw	s0, 4(sp)		# restore $s0 from the stack
+	lw	s1, 8(sp)		# restore $s1 from the stack
+	lw	s2, 12(sp)		# restore $s2 from the stack
+	lw	s3, 16(sp)		# restore $s3 from the stack
+	lw	ra, 20(sp)		# restore $ra from the stack
+	addi	sp, sp, 20		# restore stack pointer
+
+	jr	ra			# return to calling routine
+
+endquicksort:
+
+        .text
+        .global partition
+        
+        
+partition:        
+
+	addi	sp, sp, -24		# make room on stack for 6 registers
+	sw	s0, 4(sp)		# save $s0 on stack
+	sw	s1, 8(sp)		# save $s1 on stack
+	sw	s2, 12(sp)		# save $s2 on stack
+	sw	s3, 16(sp)		# save $s3 on stack
+	sw	s4, 20(sp)		# save $s4 on stack
+	sw	ra, 24(sp)		# save $ra on stack
+
+	move	s0, a0		# copy param. $a0 into $s0 (addr array)
+	move 	s1, a1		# copy param. $a1 into $s1 (low)
+
+	# initialize left, right, and pivot
+	move 	s2, s1
+	move 	s3, a2
+
+	li	$4, 4
+	mul	t0, s1, t4
+	add	t0, t0, s0
+	lw	s4, 0(t0)
+
+while:
+	blt	s2, s3, whilebody
+	j	endwhile
+
+whilebody:
+
+	while_2:
+		li	t4, 4
+		mul	t0, s3, t4
+		add	t0, t0, s0
+		lw	t1, 0(t0)
+		bgt	t1, s4, whilebody_2
+		j	endwhile_2
+	whilebody_2:
+		addi	s3, s3, -1
+		
+		j	while_2
+	endwhile_2:
+
+
+	while_3:
+		blt	s2, s3, andtest
+		j	endwhile_3
+	andtest:
+		li	t4, 4
+		mul	t1, s2, t4
+		add	t1, t1, s0
+		lw	t2, 0(t1)
+		ble	t2, s4, whilebody_3
+		j	endwhile_3
+	whilebody_3:
+		addi	s2, s2, 1
+		
+		j	while_3
+	endwhile_3:
+
+	if_2:
+		blt	s2, s3, then_2
+		j	endif_2
+	then_2:
+
+		move	a0, t1
+		move 	a1, t0
+		jal	swap
+	endif_2:
+
+	j	while
+endwhile:
+
+	li	t4, 4
+	mul	t0, s3, t4
+	add	t0, t0, s0
+	lw	t1, 0(t0)
+
+	mul	t2, s1, t4
+	add	t2, t2, s0
+	sw	t1, 0(t2)
+
+	sw	s4, 0(t0)
+
+	move 	v0, s3		# return right
+
+	lw	s0, 4(sp)		# restore $s0 from the stack
+	lw	s1, 8(sp)		# restore $s1 from the stack
+	lw	s2, 12(sp)		# restore $s2 from the stack
+	lw	s3, 16(sp)		# restore $s3 from the stack
+	lw	s4, 20(sp)		# restore $s4 from the stack
+	lw	ra, 24(sp)		# restore $ra from the stack
+	addi	sp, sp, 24		# restore stack pointer
+
+	jr	ra
+
+endPartition:
+
+
+
+	.text	
+	.globl swap
+swap:
+
+
+lw	t0, 0(a0)
+lw	t1, 0(a1)
+
+sw	t1, 0(a0)
+sw	t0, 0(a1)
+
+jr	ra
+
+endSwap:	
