@@ -1,26 +1,24 @@
 #include <iregdef.h>
 .data
-vek:	.word  1,2,3,4,5	
-n:      .word  5
+vek:	.word  4,5,3,2,1,6,7,9,8,10	
+n:      .word  10
 str1:	.asciiz "%d\n"
 str2:   .asciiz "asdaikfhsidkjgs\n"
     
 	.text
-	.global start
+	.globl start
 	.ent start
 
 start:
 	addi sp,sp, 24
 	sw ra, 20(sp)
-	
-	
 			
 	lw t0, n            # t0 har n=antal element	
 	la s0, vek			# a0 har vek	
 	li a0, 0			# a1 = 0   (low)
 	addi a1, t0, -1		# a2 = 9  (high)
+	li s1, 0			# kontroll för skriv loppen, inte mer än 2 gånger
     jal skriv
-    nop
     
     lw t0, n            # t0 har n=antal element	
 	la s0, vek			# a0 har vek	
@@ -36,23 +34,24 @@ start:
     jal skriv
     nop
     
+    
     lw ra, 20(sp)
     addi sp,sp,24
     jr ra
     nop
     
+    
     .end start
-    .global skriv
-    .ent skriv
-  
 skriv:   
 	addi sp,sp, 28
 	sw ra, 24(sp)
 	
+	
 	lw t2, n
 	li t0, 0
+
  	print:
-	 bge t0,t2,L2
+	 bge t0,10,L2
     	nop
     	sll t1,t0,2
     	add t1,s0, t1
@@ -68,93 +67,84 @@ skriv:
   	addi s1, s1, 1
   	nop     
   	
-  	.end skriv
-L2:
+ L2:
  
  	lw ra, 24(sp)            	# pop ra
   	addi sp, sp, 28
   	jr ra                   	# return
   	nop
+ 
   
     
 quicksort:   
-  
-	addi sp, sp, 20			# stack  upper, ra och j
-	sw ra, 16(sp)				# push ra
-	sw a1, 8(sp) 				# push upper
-	
-              
-		 				
-	slt t8, a0, a1 				# t8 = lower < upper
-	beq t8, zero, end		# if (lower >= upper)end
-	j partition
-	nop
-	
-	sw t1, 0(sp)            # push j
- 	addi a1, t1, 0          # a1 = j 
-  	jal quicksort           # quicksort(lower, j)
-  	nop
-  	
-  	
-  	lw t1, 0(sp)            # pop j, t1 = j
-  	addi a0, t1, 1          # a0 = j + 1
-  	lw a1, 4(sp)            # pop upper, a1 = upper
-  	jal quicksort           # quicksort(j + 1, upper)
- 	nop
 
- 	
-   	lw ra, 16(sp)            # pop ra
-  	addi sp, sp, 20
-  	jr ra                    # return
+	slt t8, a0, a1 				# t8 = left < righ
+	beq t8, zero, return		# if (left >= right) return
+	j quicksortcont
 	
-	
-	
-	end:
-	
-  	jr ra                   # return	
-             
+	return:
+		jr ra					# return
 		
-	partition:					# här börjar quicksort
+							
+quicksortcont:
+	
+	addi sp, sp, -12			# stack of right, return address, and j
+	sw ra, 8(sp)				# push return address
+	sw a1, 4(sp) 				# push right
+	
+	jal partition
+	move t1, v0  				# pivot
 	
 	
+	addi a1, t1, 0
+	jal quicksort
 	
+	lw t1, 0(sp)	
+	addi a0, t1, 1
+	lw a1, 4(sp)
+	jal quicksort
+	
+	
+	lw ra, 8(sp)           	 	# pop return address
+  	addi sp, sp, 12
+ 	jr ra                   	# return
+ 	nop	  
+			
+	
+	
+partition:	
 	sll t3, a0, 2				# t3 = left * 4
-	add t3, t3 ,s0				# t3 = &array[lower]
-	lw t3, 0(t3)				# t3 = array[lower] = pivot
+	add t3, t3 ,s0				# t3 = &array[left]
+	lw t3, 0(t3)				# t3 = array[left] = pivot
 	
-	addi t0, a0, 1				# t0 = i = lower + 1 
-	addi t1, a1, 0	 			# t1 = j = upper
+	addi t0, a0, 1				# t0 = i = left + 1
+	addi t1, a1, 0	 			# t1 = j = right
 	loop:
-	  loopI:                    #while
+	  loopI:
 		sll t4, t0, 2			# t4 = i * 4
 		add t4, s0, t4			# t4 = &array[i]
 		lw t5, 0(t4)			# t5 = array[i]
 		slt t8, t3, t5			# t8 = pivot < array[i]
 		bne t8, zero, BreakI	# if (array[i] > pivot) break
-		nop
 		addi t0, t0, 1			# i = i + 1
-		slt t8, a1, t0			# t8 = upper < i
-		bne t8, zero, BreakI	# i > upper
-		nop
+		slt t8, a1, t0			# t8 = right < i
+		bne t8, zero, BreakI	# i > right
 	   BreakI:
 		
-	     loopJ:					# while
+	     loopJ:	
 		sll t6, t1, 2			# t6 = j * 4
 		add t6, s0, t6			# t6 = &array[j]
 		lw t7, 0(t6)			# t7 = array[j]
 		slt t8, t7, t3			# t8 = array[j] < pivot
 		bne t8, zero, BreakJ	# if (array[j] < pivot) break
-		nop
 		addi t1, t1, -1			# j = j - 1
-		slt t8, a0, t1			# t8 = lower < j
-		beq t8, zero, BreakJ	# lower >= j
-		nop
+		slt t8, a0, t1			# t8 = left < j
+		beq t8, zero, BreakJ	# left >= j
 		
-	    BreakJ:	
+	     BreakJ:	
 		
 		slt t8, t1, t0			# t8 = i > j
 		bne t8, zero, EndLoop	# if (i > j) break;
-		nop
 		
 		sll t4, t0, 2			# t4 = i * 4
 		add t4, s0, t4			# t4 = &array[i]
@@ -166,22 +156,19 @@ quicksort:
     	sw t5, 0(t6)    		# swap(array[i], array[j])     
 
     	j loop        		    # while (i <= j)
-    	nop
          EndLoop:
     
-        sll t4, a0, 2           # t4 = lower * 4
-  	    add t4, s0, t4          # t4 = &array[lower]
+        sll t4, a0, 2           # t4 = left * 4
+  	    add t4, s0, t4          # t4 = &array[left]
   	    sll t6, t1, 2           # t6 = j * 4
   		add t6, s0, t6          # t6 = &array[j]
   		lw t7, 0(t6)            # t7 = array[j]
   		sw t7, 0(t4)
-  		sw t3, 0(t6)            # swap(array[lower], array[j])
-  		
-  	    ///////////////////////////////////////////////////////
-
-
-  	//	lw ra, 16(sp)            # pop ra
-  	//	addi sp, sp, 20
-  		jr ra                   # return	
-  		nop                
+  		sw t3, 0(t6)            # swap(array[left], array[j])
+  		  		  
+ 		sw t1, 0(sp)            # push j
+ 		move v0, t1
+ 		
+  		jr ra                   # return
+  		nop	                
 		
