@@ -1,0 +1,188 @@
+#include <iregdef.h>
+.data
+vek:	.word  1,2,3,4,5
+n:      .word  5
+str1:	.asciiz "%d\n"
+    
+	.text
+	.globl start
+	.ent start
+
+start:
+	addi sp,sp, 24
+	sw ra, 20(sp)
+			
+	lw t0, n            # t0 har n=antal element	
+	la s0, vek			# a0 har vek	
+	li a0, 0			# a1 = 0   (low)
+	addi a1, t0, -1		# a2 = 9  (high)
+    jal skriv
+    nop
+    
+    lw t0, n            # t0 har n=antal element	
+	la s0, vek			# a0 har vek	
+	li a0, 0			# a1 = 0   (low)
+	addi a1, t0, -1		# a2 = 9  (high)
+    jal quicksort
+    nop
+    
+    lw t0, n            # t0 har n=antal element	
+	la s0, vek			# a0 har vek	
+	li a0, 0			# a1 = 0   (low)
+	addi a1, t0, -1		# a2 = 9  (high)
+    jal skriv
+    nop
+    
+    
+    lw ra, 20(sp)
+    addi sp,sp,24
+    jr ra
+    nop
+    
+    
+    .end start
+skriv:   
+	addi sp,sp, 28
+	sw ra, 24(sp)
+	
+	
+	lw t2, n
+	li t0, 0
+
+ 	print:
+	 bge t0,t2,L2
+    	nop
+    	sll t1,t0,2
+    	add t1,s0, t1
+    	lw t1, 0(t1)
+    	nop 
+
+	la a0, str1
+	move a1, t1   
+  	jal printf    
+  	nop
+  	addi t0, t0, 1
+  	b print
+  	addi s1, s1, 1
+  	nop     
+  	
+ L2:
+ 
+ 	lw ra, 24(sp)            	# pop ra
+  	addi sp, sp, 28
+  	jr ra                   	# return
+  	nop
+ 
+ 
+ 								//s0 = vek addres
+ 								//a0 = low = 0
+ 								//a1 = high = n -1 
+  
+    
+quicksort:   
+
+	slt t8, a0, a1 				# t8 = low < high
+	beq t8, zero, return		# if (low >= high) return
+	j quicksortcont
+	nop
+	
+	return:
+		jr ra					# return
+		
+							
+quicksortcont:
+	
+	addi sp, sp, -12			
+	sw ra, 8(sp)				# push ra
+	sw a1, 4(sp) 				# push high
+	
+	jal partition
+	nop
+	move t1, v0  				# pivot
+	
+	
+	addi a1, t1, 0
+	jal quicksort       # quicksort(low , j)   //funkade inte med (low/left) -1
+	nop
+	
+	lw t1, 0(sp)	
+	addi a0, t1, 1
+	lw a1, 4(sp)
+	jal quicksort       # quicksort(j + 1, high)
+	nop
+	
+	
+	lw ra, 8(sp)           	 	# pop return address
+  	addi sp, sp, 12
+ 	jr ra                   	# return
+ 	nop	  
+			
+	
+	
+partition:	
+	sll t3, a0, 2				# t3 = low * 4
+	add t3, t3 ,s0				# t3 = &vek[low]
+	lw t3, 0(t3)				# t3 = vek[low] = pivot
+	
+	addi t0, a0, 1				# t0 = i = low + 1
+	addi t1, a1, 0	 			# t1 = j = high
+	loop:
+	  loopI:
+		sll t4, t0, 2			# t4 = i * 4
+		add t4, s0, t4			# t4 = &vek[i]
+		lw t5, 0(t4)			# t5 = vek[i]
+		slt t8, t3, t5			# t8 = pivot < vek[i]
+		bne t8, zero, BreakI	# if (vek[i] > pivot) breakI
+		nop
+		addi t0, t0, 1			# i = i + 1
+		slt t8, a1, t0			# t8 = high < i
+		bne t8, zero, BreakI	# i > right
+		nop
+	   BreakI:
+		
+	    loopJ:	
+		sll t6, t1, 2			# t6 = j * 4
+		add t6, s0, t6			# t6 = &vek[j]
+		lw t7, 0(t6)			# t7 = vek[j]
+		slt t8, t7, t3			# t8 = vek[j] < pivot
+		bne t8, zero, BreakJ	# if (vek[j] < pivot) breakJ
+		nop
+		addi t1, t1, -1			# j = j - 1
+		slt t8, a0, t1			# t8 = low < j
+		beq t8, zero, BreakJ	# low >= j
+		nop
+		
+	    BreakJ:	
+		
+		slt t8, t1, t0			# t8 = i > j
+		bne t8, zero, EndLoop	# if (i > j) EndLoop
+		nop
+		
+		sll t4, t0, 2			# t4 = i * 4
+		add t4, s0, t4			# t4 = &vek[i]
+		lw t5, 0(t4)			# t5 = vek[i]
+		sll t6, t1, 2			# t6 = j * 4
+		add t6, s0, t6       	# t6 = &vek[j]
+    	lw t7, 0(t6)            # t7 = vek[j]
+    	sw t7, 0(t4)
+    	sw t5, 0(t6)    		# swap(vek[i], vek[j])     
+
+    	j loop        		    # while (i <= j)
+    	nop
+        EndLoop:
+    
+        sll t4, a0, 2           # t4 = low * 4
+  	    add t4, s0, t4          # t4 = &vek[low]
+  	    sll t6, t1, 2           # t6 = j * 4
+  		add t6, s0, t6          # t6 = &vek[j]
+  		lw t7, 0(t6)            # t7 = vek[j]
+  		sw t7, 0(t4)
+  		sw t3, 0(t6)            # swap(vek[low], vek[j])
+  		  		  
+ 		sw t1, 0(sp)            # push j
+ 		move v0, t1
+ 		
+  		jr ra                   # return
+  		nop	                
+		
+		
