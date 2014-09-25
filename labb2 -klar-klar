@@ -108,32 +108,32 @@ partition:
 	addi t0, a0, 1				# t0 = i = low + 1
 	addi t1, a1, 0	 			# t1 = j = high
 	Do:
-	  loopI:
+	  loop1:
 		sll t4, t0, 2			# t4 = i * 4
 		add t4, s0, t4			# t4 = &vek[i]
 		lw t5, 0(t4)			# t5 = vek[i]
 		slt t8, t3, t5			# t8 = pivot < vek[i]
-		bne t8, zero, BreakI	# if (vek[i] > pivot) breakI
+		bne t8, zero, Break1	# if (vek[i] > pivot) breakI
 		nop
 		addi t0, t0, 1			# i = i + 1
 		slt t8, a1, t0			# t8 = high < i
-		bne t8, zero, BreakI	# i > right
+		bne t8, zero, Break1	# i > right
 		nop
-	   BreakI:
+	   Break1:
 		
-	    loopJ:	
+	    loop2:	
 		sll t6, t1, 2			# t6 = j * 4
 		add t6, s0, t6			# t6 = &vek[j]
 		lw t7, 0(t6)			# t7 = vek[j]
 		slt t8, t7, t3			# t8 = vek[j] < pivot
-		bne t8, zero, BreakJ	# if (vek[j] < pivot) breakJ
+		bne t8, zero, Break2	# if (vek[j] < pivot) breakJ
 		nop
 		addi t1, t1, -1			# j = j - 1
 		slt t8, a0, t1			# t8 = low < j
-		beq t8, zero, BreakJ	# low >= j
+		beq t8, zero, Break2	# low >= j
 		nop
 		
-	    BreakJ:			
+	    Break2:			
 		slt t8, t1, t0			# t8 = i > j
 		bne t8, zero, EndWhile	# if (i > j) EndLoop
 		nop		
