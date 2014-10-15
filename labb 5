@@ -1,0 +1,134 @@
+/* Program som simulerar olika algoritmer för diskarmsrörelser
+   Se Silberschatz/Galvin/Gagne sid 493 och framåt */
+
+/*   För alla funktionewr gäller:
+     pre: size är storleken av vector och större än 0. size < 100.
+     post: returnerar summan av rörelserna från parked genom hela vektorn */
+#include <limits.h>
+#include<stdio.h>
+#include<math.h>
+
+int FCFS(int parked, int vector[],int size){
+    int i, now, sum;
+    sum= abs(vector[0]-parked);
+    now= vector[0];
+    for(i=1;i<size;i++){
+        sum= sum+abs(vector[i]-now);
+        now= vector[i];
+    }
+    return sum;
+}
+
+int SSTF(int parked, int vector[],int size){
+    int i, now, sum, beenthere[100]={0};    /* beenthere =0, vi har inte varit där än */
+    int ready= 0, distance, nearest;
+    sum=0;
+    now= parked;
+    while(!ready){
+        /* look up the nearest among the ones we have not visited */
+        distance= INT_MAX;
+        for(i=0;i<size;i++){
+                if(!beenthere[i]){
+                        if(distance>abs(now-vector[i])){
+                                distance=abs(now-vector[i]);
+                                nearest= i;
+                        }
+                }
+        }
+        /* move */
+        now= vector[nearest];
+        printf("visit %d\n",now);
+        /* sum travel */
+        sum= sum+ distance;
+        /* set beenthere */
+        beenthere[nearest]=1;
+        /* ready yet? */
+        ready= 1;
+        for(i=0;i<size;i++){
+                if(beenthere[i]==0){
+                        ready= 0;
+                }
+        }
+    }
+    return sum;
+}
+
+int SCAN(int parked, int vector[],int size){
+int b,j,i=0, sum=67;
+
+
+for(i=0;i<=size;i++)           
+    {
+        for(j=0;j<size-i;j++)
+        {
+            if(vector[j]<vector[j+1])
+            {
+                b=vector[j];
+                vector[j]=vector[j+1];
+                vector[j+1]=b;
+            }
+        }
+    }
+
+  
+      
+ 
+ return sum;
+
+}
+int CSCAN(int parked, int vector[],int size){
+
+int b,sum=78,j,i,cp,nposn;
+// todo:  stoppa in parked i vektor[0] 
+
+// sorterar vektorn
+for(i=0;i<=size;i++)           
+    {
+        for(j=0;j<size-i;j++)
+        {
+            if(vector[j]<vector[j+1])
+            {
+                b=vector[j];
+                vector[j]=vector[j+1];
+                vector[j+1]=b;
+            }
+        }
+    }
+
+
+
+// cp blir lika med size om parked inte finns i vektorn.
+ cp=0;
+ do
+ {
+  if(vector[cp] == parked)
+   break;
+  cp++;
+ }while(cp!=size);
+
+// g[r igenom alla i f;rhoppningsvis r'tt 
+j=cp;
+parked = vector[cp];
+do
+ {
+   if(parked == vector[size])
+  { nposn = 199; cp = -1; }
+    else
+    nposn = vector[++cp];
+    printf(" %d\t\t%d\t\t%d\n",parked,nposn,abs(parked-nposn));
+    sum += (abs(parked-nposn));
+    parked = nposn == 199 ? 0 : nposn;
+ }while(nposn != vector[j-1]);
+
+  return sum;
+}
+
+
+
+main(){
+       int v[]={95, 180, 34, 119, 11, 123, 62, 64};
+       printf("FCFS: %d\n",FCFS(50,v,sizeof(v)/sizeof(int)));
+       printf("SSTF: %d\n",SSTF(50,v,sizeof(v)/sizeof(int)));
+       printf("SCAN: %d\n",SCAN(50,v,sizeof(v)/sizeof(int)));
+       printf("CSCAN: %d\n",SCAN(53,v,sizeof(v)/sizeof(int)));
+}
