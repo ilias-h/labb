@@ -37,7 +37,7 @@ int SSTF(int parked, int vector[],int size){
         }
         /* move */
         now= vector[nearest];
-        printf("visit %d\n",now);
+       // printf("visit %d\n",now);
         /* sum travel */
         sum= sum+ distance;
         /* set beenthere */
@@ -53,15 +53,29 @@ int SSTF(int parked, int vector[],int size){
     return sum;
 }
 
+
+
+
+
+
+
+
+
+
 int SCAN(int parked, int vector[],int size){
-int b,j,i=0, sum=67;
+int b, j, i, cp, nposn, c;
+int sum=0;
 
+  for (c = size; c >= 0; c--)
+  {  vector[c+1] = vector[c];  }
 
-for(i=0;i<=size;i++)           
+  vector[0] = parked;
+
+  for(i=0;i<=size;i++)           
     {
-        for(j=0;j<size-i;j++)
+      for(j=0;j<size-i;j++)
         {
-            if(vector[j]<vector[j+1])
+          if(vector[j] > vector[j+1])
             {
                 b=vector[j];
                 vector[j]=vector[j+1];
@@ -69,35 +83,7 @@ for(i=0;i<=size;i++)
             }
         }
     }
-
-  
-      
  
- return sum;
-
-}
-int CSCAN(int parked, int vector[],int size){
-
-int b,sum=78,j,i,cp,nposn;
-// todo:  stoppa in parked i vektor[0] 
-
-// sorterar vektorn
-for(i=0;i<=size;i++)           
-    {
-        for(j=0;j<size-i;j++)
-        {
-            if(vector[j]<vector[j+1])
-            {
-                b=vector[j];
-                vector[j]=vector[j+1];
-                vector[j+1]=b;
-            }
-        }
-    }
-
-
-
-// cp blir lika med size om parked inte finns i vektorn.
  cp=0;
  do
  {
@@ -106,29 +92,216 @@ for(i=0;i<=size;i++)
   cp++;
  }while(cp!=size);
 
-// g[r igenom alla i f;rhoppningsvis r'tt 
-j=cp;
+ 	int tmp = cp;
+ 	int ind = 0;
+ 	parked = vector[cp];
+ 	do
+ 	{
+  	if(ind == 0)
+  	{
+   	if(cp == 0)
+   	{ nposn = 0; ind = 1; }
+  	 else
+   	 nposn = vector[--cp];
+  	}
+ 	 else
+  	{
+  	 if(cp == 0)
+   	 cp = tmp;
+   	nposn = vector[++cp];
+  	}
+  //printf(" %d\t\t%d\t\t%d\n",parked,nposn,abs(parked-nposn));
+  	sum += (abs(parked-nposn));
+  	parked = nposn;
+ 	}while(nposn!=vector[size]);
+
+ return sum;
+
+}
+
+
+
+
+
+
+int CSCAN(int parked, int vector[],int size){
+
+int b, j, i, cp, nposn, c;
+int sum=0;
+
+ 	for (c = size; c >= 0; c--)
+ 	{  vector[c+1] = vector[c];  }
+
+ 	vector[0] = parked;
+
+ for(i=0;i<=size;i++)           
+    {
+      for(j=0;j<size-i;j++)
+        {
+          if(vector[j] > vector[j+1])
+            {
+                b=vector[j];
+                vector[j]=vector[j+1];
+                vector[j+1]=b;
+            }
+        }
+    }
+
+ //for ( c = 0; c <= size; c++)
+// {  printf("%d\n", vector[c]);  }
+
+ cp=0;
+ do
+ {
+  if(vector[cp] == parked)
+   break;
+  cp++;
+ }while(cp!=size);
+
+
+j=cp;   
 parked = vector[cp];
-do
+ do
  {
    if(parked == vector[size])
   { nposn = 199; cp = -1; }
     else
     nposn = vector[++cp];
-    printf(" %d\t\t%d\t\t%d\n",parked,nposn,abs(parked-nposn));
+    //printf(" %d\t\t%d\t\t%d\n",parked,nposn,abs(parked-nposn));
     sum += (abs(parked-nposn));
     parked = nposn == 199 ? 0 : nposn;
  }while(nposn != vector[j-1]);
 
   return sum;
+
 }
+
+
+
+
+
+int LOOK(int parked, int vektor[],int size){
+
+int b, j, i, cp, nposn, c;
+int sum=0;
+
+  for (c = size; c >= 0; c--)
+  {  vektor[c+1] = vektor[c];  }
+
+  vektor[0] = parked;
+
+  for(i=0;i<=size;i++)           
+    {
+      for(j=0;j<size-i;j++)
+        {
+          if(vektor[j] > vektor[j+1])
+            {
+                b = vektor[j];
+                vektor[j]=vektor[j+1];
+                vektor[j+1] = b;
+            }
+        }
+    }
+
+
+  for ( c = 0; c <= size; c++)
+ {  printf("%d\n", vektor[c]);  }
+
+
+
+ cp=0;
+ do
+ {
+  if(vektor[cp] == parked)
+   break;
+  cp++;
+ }while(cp!=size);
+
+
+int tmp = cp;
+int ind = 0;
+parked = vektor[cp];
+ do
+ {
+  if(ind == 0)
+  {
+   if(cp == 0)
+   {
+    cp = tmp;
+    nposn = vektor[++cp]; ind = 1;
+   }
+   else
+    nposn = vektor[--cp];
+  }
+  else
+    nposn = vektor[++cp];
+
+  //printf(" %d\t\t%d\t\t%d\n",parked,nposn,abs(parked-nposn));
+  sum += (abs(parked-nposn));
+  parked = nposn;
+ }while(nposn!=vektor[size]);
+return sum;
+ 
+
+}
+
+int CLOOK(int parked, int vector[],int size){
+int b, j, i, cp, nposn, c;
+int sum=0;
+
+  for (c = size; c >= 0; c--)
+  {  vector[c+1] = vector[c];  }
+
+  vector[0] = parked;
+
+  for(i=0;i<=size;i++)           
+    {
+      for(j=0;j<size-i;j++)
+        {
+          if(vector[j] < vector[j+1])
+            {
+                b=vector[j];
+                vector[j]=vector[j+1];
+                vector[j+1]=b;
+            }
+        }
+    }
+ 
+ cp=0;
+ do
+ {
+  if(vector[cp] == parked)
+   break;
+  cp++;
+ }while(cp!=size);
+
+j=cp;
+parked = vector[cp];
+
+ do
+ {
+  if(cp == size)
+  { nposn = vector[0]; cp = 0; }
+  else
+   nposn = vector[++cp];
+  printf(" %d\t\t%d\t\t%d\n",parked,nposn,abs(parked-nposn));
+  sum += (abs(parked-nposn));
+  parked = nposn == vector[size] ? vector[0] : nposn ;
+ }while(nposn != vector[j-1]);
+
+return sum;
+
+}
+
 
 
 
 main(){
        int v[]={95, 180, 34, 119, 11, 123, 62, 64};
-       printf("FCFS: %d\n",FCFS(50,v,sizeof(v)/sizeof(int)));
-       printf("SSTF: %d\n",SSTF(50,v,sizeof(v)/sizeof(int)));
-       printf("SCAN: %d\n",SCAN(50,v,sizeof(v)/sizeof(int)));
-       printf("CSCAN: %d\n",SCAN(53,v,sizeof(v)/sizeof(int)));
+       //printf("FCFS: %d\n",FCFS(50,v,sizeof(v)/sizeof(int)));
+       //printf("SSTF: %d\n",SSTF(50,v,sizeof(v)/sizeof(int)));
+     //printf("SCAN: %d\n",SCAN(50,v,sizeof(v)/sizeof(int)));
+     //printf("C-SCAN: %d\n",CSCAN(50,v,sizeof(v)/sizeof(int)));
+     //printf("LOOK: %d\n",LOOK(50,v,sizeof(v)/sizeof(int)));      //funkar bara ensam
+     p//rintf("C-LOOK: %d\n",CLOOK(50,v,sizeof(v)/sizeof(int)));  //funkar bara ensam
 }
